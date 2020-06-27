@@ -1,0 +1,194 @@
+.data
+
+strIn: .asciiz "Nhap n(0<n<1000):"
+strElement: .asciiz "Nhap phan tu: "
+strE: .asciiz "Phan tu: "
+strNl: .asciiz  "\n"
+
+funct:  .asciiz "\t\tMenu\n"
+funct1: .asciiz "1.Xuat ra cac phan tu\n"
+funct2: .asciiz "2.Tinh tong cac phan tu\n"
+funct3: .asciiz "3.Liet ke cac phan tu la so nguyen to\n"
+funct4: .asciiz "4.Tim max\n"
+funct5: .asciiz "5.Tim phan tu\n"
+funct6: .asciiz "6.Thoat chuong trinh\n"
+
+str1: .asciiz "Lua chon cua ban: "
+strEr: .asciiz "Lua chon nhap khong hop le\n"
+
+array: .word 0:999
+
+.text
+main:
+	addi $v0, $0, 4
+	la $a0, strIn
+	syscall
+
+	addi $v0, $0, 5
+	syscall
+
+	add $s0, $0,$v0 #
+	add $a1,$0,$s0 #l?u n vào $a1
+
+	slti $t0,$s0,1 #n?u $s0<1 thì $t0=1
+	beq $t0,1,main
+
+	sgt $t0,$s0,999 #n?u $s0>999 thì $t0=1
+	beq $t0,1,main
+
+
+	addi $t0,$0,0 #con ch?y
+	li $a2,4
+	mul $a2,$a1,$a2
+
+	Input:
+		
+		beq $t0,$a2,ExitInput
+		
+		addi $v0, $0, 4
+		la $a0, strElement
+		syscall
+
+		addi $v0, $0, 5
+		syscall
+		
+		add $t2,$0,$v0
+
+		sw $t2,array($t0)
+		addi $t0,$t0,4
+
+		j Input
+	ExitInput:
+Loop:
+	addi $v0, $0, 4
+	la $a0, funct
+	syscall
+
+	addi $v0, $0, 4
+	la $a0, funct1
+	syscall
+
+	addi $v0, $0, 4
+	la $a0, funct2
+	syscall
+
+	addi $v0, $0, 4
+	la $a0, funct3
+	syscall
+
+	addi $v0, $0, 4
+	la $a0, funct4
+	syscall
+
+	addi $v0, $0, 4
+	la $a0, funct5
+	syscall
+
+	addi $v0, $0, 4
+	la $a0, funct6
+	syscall
+
+
+	addi $v0, $0, 4 #in chu?i 
+	la $a0, str1
+	syscall
+
+	addi $v0,$0,5 #??c vào l?a ch?n
+	syscall
+
+	add $s1,$0,$v0 #l?a ch?n l?u vào $s1
+	addi $t0,$s1,-1
+
+	bne $t0,$0,case2 #n?u !=1 thì ??n case2
+	#x? lý =1
+	addi $v0, $0, 4
+	la $a0, funct1
+	syscall
+	#
+	jal Function1
+	
+	#
+	j EndOfCase
+
+	case2:
+		addi $t0,$s1,-2 
+		bne $t0,$0,case3 #n?u !=2 thì ??n case3
+		#x? lý =2
+		addi $v0, $0, 4
+		la $a0, funct2
+		syscall
+		#
+		j EndOfCase
+	case3:
+		addi $t0,$s1,-3
+		bne $t0,$0,case4 #n?u !=3 thì ??n case4
+		#x? lý =3
+		addi $v0, $0, 4
+		la $a0, funct3
+		syscall
+		#
+		j EndOfCase
+	case4:
+		addi $t0,$s1,-4
+		bne $t0,$0,case5 #n?u !=4 thì ??n case5
+		#x? lý =4
+		addi $v0, $0, 4
+		la $a0, funct4
+		syscall
+		#
+		j EndOfCase
+	case5:
+		addi $t0,$s1,-5
+		bne $t0,$0,case6 #n?u !=5 thì ??n case6
+		#x? lý =5
+		addi $v0, $0, 4
+		la $a0, funct5
+		syscall
+		#
+		j EndOfCase
+	case6:
+		addi $t0,$s1,-6
+		bne $t0,$0,EndOfCase #n?u !=6 thì ??n EndOfCase
+		#x? lý =6
+		addi $v0, $0, 4
+		la $a0, funct6
+		syscall
+		j Exit
+		#
+	
+
+Exit:
+addi $v0, $0, 10
+syscall
+
+Function1:
+	li $t0,0
+	Loop1:
+
+		beq $t0,$a2,ExitLoop1
+		
+		addi $v0, $0, 4
+		la $a0, strE
+		syscall
+		
+		lw $t2, array($t0)
+
+		
+		add $v0,$0,1
+		add $a0,$0,$t2
+		syscall
+		addi $v0, $0, 4
+		la $a0, strNl
+		syscall
+		
+		addi $t0,$t0,4
+		
+		j Loop1
+	ExitLoop1:
+		jr $ra
+	
+
+EndOfCase:
+j Loop
+
+
