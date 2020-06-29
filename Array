@@ -18,6 +18,7 @@ strEr: .asciiz "Lua chon nhap khong hop le\n"
 strX: .asciiz "Nhap X: "
 msgFind: .asciiz "Vi tri: "
 msgMax: .asciiz "Max la \n"
+msgCantFind: .asciiz "Khong co phan tu can tim trong mang \n"
 array: .word 0:999
 
 .text
@@ -217,6 +218,7 @@ PrintPrime:
 	addi $sp, $sp, -8
 	sw $ra, 4($sp)
 	Loop3:
+		
 		beq $t0,$a2,ExitLoop3
 		lw $t2, array($t0)
 
@@ -243,7 +245,13 @@ PrintPrime:
 	checkPrime:
 		li $t7, 2 
 		li $t5, 3
+		li $t3, 2
 		LoopPrime:
+			slt $t4 ,$t2, $t3
+			addi $t0, $t0, 4
+			beq $t4, 1, Loop3 
+			addi $t0, $t0, -4
+			beq $t2, 2, ExitLoopPrime
 			beq $t5, $t2, ExitLoopPrime
 			div $t2, $t7
 			mfhi $t6
@@ -283,6 +291,7 @@ Max:
 FindX:
 	li $t0, 0
 	li $t1, 1
+	li $t4, 0
 	addi $v0, $0, 4
 	la $a0, strX
 	syscall
@@ -300,7 +309,14 @@ FindX:
 		addi $t1, $t1, 1
 		j Loop5
 	ExitLoop5:
+		beq $t4, 0, noFound
 		jr $ra
+	noFound:
+		addi $v0, $0, 4
+		la $a0, msgCantFind
+		syscall
+		addi $t4, $0, 1
+		j ExitLoop5
 	PrintPosition:
 		addi $v0, $0, 4
 		la $a0, msgFind
@@ -314,7 +330,7 @@ FindX:
 		la $a0, strNl
 		syscall
 		addi $t0, $t0, 4
-		addi $t1, $t1, 1
+		addi $t4, $0, 1
 		j Loop5
 	
 EndOfCase:
