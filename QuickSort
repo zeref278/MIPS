@@ -1,0 +1,106 @@
+.text
+	.globl main
+	
+main:
+	#HOW TO READ INTO A FILE
+	
+	li $v0,13           	# open_file syscall code = 13
+    	la $a0,fileNameInput     	# get the file name
+    	li $a1,0           	# file flag = read (0)
+    	syscall
+    	move $s0,$v0        	# save the file descriptor. $s0 = file
+	
+	#read the file
+	li $v0, 14		# read_file syscall code = 14
+	move $a0,$s0		# file descriptor
+	la $a1,fileWords  	# The buffer that holds the string of the WHOLE file
+	la $a2,1024		# hardcoded buffer length
+	syscall
+	
+	jal atoi
+	# print whats in the file
+        li $t2, 4
+        lw $t1,array($t2)
+        add $a3, $0, $t1
+	jal print
+	#Close the file
+    	li $v0, 16         		# close_file syscall code
+    	move $a0,$s0      		# file descriptor to close
+    	syscall
+    	
+    	# HOW TO WRITE INTO A FILE
+
+    	
+	#MUST CLOSE FILE IN ORDER TO UPDATE THE FILE
+    	li $v0,16         		# close_file syscall code
+    	move $a0,$s1      		# file descriptor to close
+    	syscall
+
+	addi $v0, $0, 10
+	syscall
+atoi:
+    or      $v0, $zero, $zero   # num = 0
+    or      $t1, $zero, $zero   # isNegative = false
+    lb      $t0, 0($a1)
+    bne     $t0, '+', .isp      # consume a positive symbol
+    addi    $a1, $a1, 1
+.isp:
+    lb      $t0, 0($a1)
+    bne     $t0, '-', .num
+    addi    $t1, $zero, 1       # isNegative = true
+    addi    $a1, $a1, 1
+    li 	    $s1, 0 
+    
+.num:
+    
+    lb      $t0, 0($a1)
+    slti    $t2, $t0, 58        # *str <= '9'
+    slti    $t3, $t0, '0'       # *str < '0'
+    beq     $t0, 32, .nextChar
+    beq     $t2, $zero, .done
+    bne     $t3, $zero, .done
+    sll     $t2, $v0, 1
+    sll     $v0, $v0, 3
+    add     $v0, $v0, $t2       # num *= 10, using: num = (num << 3) + (num << 1)
+    addi    $t0, $t0, -48
+    add     $v0, $v0, $t0       # num += (*str - '0')
+    addi    $a1, $a1, 1         # ++num
+    
+    lw $t7, array($s1)	
+    add $t7, $0, $v0
+    addi $s1, $s1, 4
+    sw $t7, array($s1)
+    j   .num
+.done:
+    beq     $t1, $zero, .out    # if (isNegative) num = -num
+    sub     $v0, $zero, $v0
+.nextChar:
+    addi    $a1, $a1, 1
+    add $v0, $0,0
+    j .num
+.out:
+    jr      $ra 
+print:
+	li $t0, 8
+ 	li $t4, 4
+	mul $t3, $a3, $t4
+	addi $t3, $t3, 8
+	Loop1:
+
+		beq $t0,$t3,ExitLoop1
+		lw $t2, array($t0)
+		add $v0,$0,1
+		add $a0,$0,$t2
+		syscall
+		
+		addi $t0,$t0,4
+		
+		j Loop1
+	ExitLoop1:
+		jr $ra
+#STRINGS
+.data
+fileNameInput: .asciiz "D:/file.txt"
+fileNameOutput: .asciiz "D:/testout.txt"
+fileWords: .space 1024
+array:  .word 0:999
