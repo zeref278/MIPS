@@ -1,7 +1,7 @@
 #STRINGS
 .data
-fileNameInput: .asciiz "file.txt"
-fileNameOutput: .asciiz "D:/testout.txt"
+fileNameInput: .asciiz "input_sort.txt"
+fileNameOutput: .asciiz "testout.txt"
 fileWords: .space 1024
 characterSpace: .asciiz " "
 
@@ -259,6 +259,8 @@ Parse:
 GetLength:
 	li $t1,10
 	li $t3,0 #kq
+
+	beq $a1,0,.endif
 	whileLoop:
 		#$a1=intterger
 		beqz $a1,endLoop
@@ -270,12 +272,19 @@ GetLength:
 	endLoop:
 		move $v0,$t3
 		jr $ra
+
+	.endif:
+		li $t3,1
+		j endLoop
+
 Convert:
 	li $t1,10
 	add $a3,$a3,$a2
 
 	addi $sp,$sp,-4
 	sw $ra,0($sp)
+
+	beq $a1,0,.endif1
 	whileLoop1:
 		#$a1=intterger
 		#$a0=address
@@ -294,6 +303,14 @@ Convert:
 		lw $ra,0($sp)
 		addi $sp,$sp,4
 		jr $ra
+
+		.endif1:
+			li $t2,48
+			sb $t2,0($a3)
+			lw $ra,0($sp)
+		addi $sp,$sp,4
+		jr $ra
+			
 WriteToFile:
 	#Open file to write
 	li $v0,13        
